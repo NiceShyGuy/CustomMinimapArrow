@@ -1,4 +1,4 @@
-## Interface: 20506, 20504
+## Interface: 40402, 40403, 40404, 50504
 ## Title: Custom Minimap Arrow
 ## Notes: Replaces the default minimap arrow with a custom one.
 ## Author: AAxBattery
