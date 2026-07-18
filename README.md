@@ -3,10 +3,10 @@
 ## Overview
 Take full control of your minimap arrow! Stylish designs, custom vector dial & needle with adjustable ticks, thickness & colors. Always renders on top. Smart dungeon & Rotate Minimap support. Works on Retail & all Classic versions.
 
-## *Custom Arrow in Use*
 ![Custom Minimap Arrow - Screenshot 1](Screenshot1.png)
 
-## *Customization Panel*
+![Custom Minimap Arrow - Screenshot 2](Screenshot3.png)
+
 ![Custom Minimap Arrow - Screenshot 2](Screenshot2.png)
 
 ## Features
@@ -16,6 +16,8 @@ Take full control of your minimap arrow! Stylish designs, custom vector dial & n
 - Precise Scale Controls – Independently adjust the size of the minimap arrow and the facing-text display.
 - Custom Arrow Styles – Replace the default minimap arrow with a selection of clean, modern designs.
 - Facing Display – Movable compass-style frame that shows your exact facing direction in degrees, with its own scale and reset option.
+- World Map Support - Added a custom `WorldMapArrowFrame` that renders above all other UI elements. Automatically hides the default Blizzard player arrow. Robust handling for dungeons/instances and full cross-version compatibility (Classic through Retail).  
+- Respects Arrow Scale setting and player facing.
 - Configuration Panel – Open with /cma. Intuitive layout gives you direct control over arrow style, facing text, dial/needle visibility, tick length & thickness, needle length & thickness, and live color swatches (with clear borders for dark colors). Supports both modern and classic color pickers.
 
 ## Installation
