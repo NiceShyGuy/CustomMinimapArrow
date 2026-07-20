@@ -31,6 +31,13 @@ end
 -- Path to the arrow textures
 ArrowDirectory = "Interface\\AddOns\\CustomMinimapArrow\\Arrows\\"
 
+-- Compatibility helper: not every client exposes Minimap:SetPlayerTexture.
+local function SafeSetPlayerTexture(texture)
+    if Minimap and Minimap.SetPlayerTexture then
+        Minimap:SetPlayerTexture(texture)
+    end
+end
+
 -- Slash command to open the configuration panel
 SLASH_CUSTOMMINIMAPARROW1 = "/cma"
 SlashCmdList["CUSTOMMINIMAPARROW"] = function(msg)
@@ -434,7 +441,7 @@ function UpdateArrowTexture(arrowTexturePath)
         DialFrame:Hide()
         NeedleFrame:Hide()
         -- change the minimap arrow to the last saved arrow
-        Minimap:SetPlayerTexture(arrowTexturePath)
+        SafeSetPlayerTexture(arrowTexturePath)
         return
     end
 
@@ -444,7 +451,7 @@ function UpdateArrowTexture(arrowTexturePath)
         CustomArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
         CustomArrowFrame:Show()
         -- Hide the default minimap arrow
-        Minimap:SetPlayerTexture(ArrowDirectory .. "Empty")
+        SafeSetPlayerTexture(ArrowDirectory .. "Empty")
     else
         print("Error: scaleFactor is not set properly.")
     end
