@@ -5,5 +5,7 @@
 ## Version: 1.0
 ## DefaultState: Enabled
 ## SavedVariables: CustomMinimapArrowDB
+## IconTexture: Interface/AddOns/CustomMinimapArrow/Icon
+## Category: Map
 
 CustomMinimapArrow.lua
