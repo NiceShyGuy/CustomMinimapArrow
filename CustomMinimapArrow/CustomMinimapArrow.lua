@@ -113,23 +113,29 @@ WorldMapArrowFrame.texture = WorldMapArrowFrame:CreateTexture(nil, "OVERLAY", ni
 WorldMapArrowFrame.texture:SetAllPoints(WorldMapArrowFrame)
 
 -- Helper: hide the default Blizzard player arrow pin on the world map
--- We intentionally avoid changing shared provider.pin objects here because those can
--- be used by party/raid members as well, and making them transparent hides those units.
+-- Uses Blizzard's GroupMembersDataProvider API so party/raid pins stay visible.
 local function SetDefaultPlayerArrowVisibility(visible)
     if not WorldMapFrame or not WorldMapFrame.dataProviders then return end
 
     for provider in pairs(WorldMapFrame.dataProviders) do
-        if type(provider) == "table" and type(provider.ShouldShowUnit) == "function" and provider:ShouldShowUnit("player") then
-            local pin
-            if type(provider.GetPin) == "function" then
-                pin = provider:GetPin("player")
-            elseif type(provider.pins) == "table" then
-                pin = provider.pins["player"] or provider.pins.player
-            end
+        if type(provider) == "table" and type(provider.SetUnitPinSize) == "function" and type(provider.ShouldShowUnit) == "function" then
+            local sizes = provider.GetUnitPinSizesTable and provider:GetUnitPinSizesTable()
+            if sizes and sizes.player ~= nil then
+                if visible then
+                    local restoreSize = provider.__CustomMinimapArrowPlayerSize or 27
+                    provider:SetUnitPinSize("player", restoreSize)
+                else
+                    if provider.__CustomMinimapArrowPlayerSize == nil then
+                        provider.__CustomMinimapArrowPlayerSize = sizes.player
+                    end
+                    provider:SetUnitPinSize("player", 0)
+                end
 
-            if pin then
-                pin:SetAlpha(visible and 1 or 0)
+                if provider.pin then
+                    provider.pin:SynchronizePinSizes()
+                end
             end
+            break
         end
     end
 end
@@ -176,7 +182,7 @@ WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
         return
     end
 
-    -- Convert normalized map coords to screen coords via ScrollContainer.Child
+    -- Convert normalized map coords to map-local coords via ScrollContainer.Child
     local scrollChild = WorldMapFrame.ScrollContainer and WorldMapFrame.ScrollContainer.Child
     if not scrollChild or not scrollChild:IsVisible() then
         self.texture:Hide()
@@ -188,7 +194,7 @@ WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
     local mapHeight = scrollChild:GetHeight()
     local scale = scrollChild:GetEffectiveScale()
     local left, top = scrollChild:GetLeft(), scrollChild:GetTop()
-    if not left or not top or not mapWidth or not mapHeight or not scale then
+    if not mapWidth or not mapHeight or not scale or not left or not top then
         self.texture:Hide()
         ShowDefaultPlayerArrow()
         return
@@ -197,17 +203,20 @@ WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
     -- Hide the default Blizzard player arrow
     HideDefaultPlayerArrow()
 
-    -- Compute screen-space position
+    -- Update size based on arrow scale setting and world map frame scale to match a normal map at 100%.
+    local mapFrameScale = WorldMapFrame:GetScale() or 1
+    local arrowScale = (CustomMinimapArrowDB.scaleFactor or 1) * mapFrameScale
+    local sz = 32 * arrowScale
+    self:SetSize(sz, sz)
+
+    -- Always use UIParent for screen-space positioning.
+    if self:GetParent() ~= UIParent then
+        self:SetParent(UIParent)
+    end
+    self:ClearAllPoints()
     local myScale = UIParent:GetEffectiveScale()
     local screenX = (left + px * mapWidth) * scale / (myScale or 1)
     local screenY = (top - py * mapHeight) * scale / (myScale or 1)
-
-    -- Update size based on arrow scale setting
-    local sz = 32 * (CustomMinimapArrowDB.scaleFactor or 1)
-    self:SetSize(sz, sz)
-
-    -- Position on screen
-    self:ClearAllPoints()
     self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", screenX, screenY)
 
     -- Rotate to match player facing
@@ -235,6 +244,19 @@ if WorldMapFrame then
     WorldMapFrame:HookScript("OnHide", function()
         WorldMapArrowFrame:Hide()
     end)
+
+    WorldMapFrame:HookScript("OnSizeChanged", function()
+        if CustomMinimapArrowDB.showWorldMap and WorldMapArrowFrame:IsVisible() then
+            WorldMapArrowFrame:Show()
+        end
+    end)
+    if WorldMapFrame.ScrollContainer then
+        WorldMapFrame.ScrollContainer:HookScript("OnSizeChanged", function()
+            if CustomMinimapArrowDB.showWorldMap and WorldMapArrowFrame:IsVisible() then
+                WorldMapArrowFrame:Show()
+            end
+        end)
+    end
 end
 
 -- Create a custom arrow frame
