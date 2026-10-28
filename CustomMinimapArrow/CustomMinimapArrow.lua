@@ -44,7 +44,6 @@ end)
 function UpdateCustomArrowTexture(arrowTexturePath)
     -- Detect if in dungeon
     inInstance, instanceType = IsInInstance()
-    print(inInstance)
     -- If in a dungeon, hide all frames
     if inInstance then
         customArrowFrame:Hide()
