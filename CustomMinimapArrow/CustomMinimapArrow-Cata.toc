@@ -1,7 +1,7 @@
 ## Interface: 40402, 40403, 40404, 50504
 ## Title: Custom Minimap Arrow
-## Notes: Replaces the default minimap arrow with a custom one.
-## Author: AAxBattery
+## Notes: Replaces the default minimap and worldmap arrow.
+## Author: NiceShyGuy
 ## Version: 1.0
 ## DefaultState: Enabled
 ## SavedVariables: CustomMinimapArrowDB
