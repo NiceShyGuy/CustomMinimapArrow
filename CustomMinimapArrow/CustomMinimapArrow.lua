@@ -7,17 +7,44 @@ CustomMinimapArrowDB.facingXPos = CustomMinimapArrowDB.facingXPos or -34
 CustomMinimapArrowDB.facingYPos = CustomMinimapArrowDB.facingYPos or 31
 CustomMinimapArrowDB.showDialog = CustomMinimapArrowDB.showDialog or true
 
+-- Path to the arrow textures
+arrowDirectory = "Interface\\AddOns\\CustomMinimapArrow\\Arrows\\"
+
 -- Slash command to open the configuration panel
 SLASH_CUSTOMMINIMAPARROW1 = "/cma"
 SlashCmdList["CUSTOMMINIMAPARROW"] = function(msg)
     CustomMinimapArrowConfigPanel:Show()
 end
 
+-- Event handling
+frame = CreateFrame("Frame")
+frame:SetScript("OnEvent", function(self, event, addonName)
+    if event == "ADDON_LOADED" and addonName == "CustomMinimapArrow" then
+        UpdateCustomArrowTexture(arrowDirectory .. CustomMinimapArrowDB.lastArrow)
+        CreateConfigPanel()
+        if CustomMinimapArrowDB.showFacing then
+            facingFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", CustomMinimapArrowDB.facingXPos, -CustomMinimapArrowDB.facingYPos)
+            facingFrame:Show()
+        else
+            facingFrame:Hide()
+        end
+        if CustomMinimapArrowDB.showDial then
+            dialFrame:Show()
+            needleFrame:Show()
+        else
+            dialFrame:Hide()
+            needleFrame:Hide()
+        end
+    end
+end)
+frame:RegisterEvent("ADDON_LOADED")
+frame:RegisterEvent("PLAYER_LOGIN")
+
 -- Detect loading screen enabled
 local loadingScreen = CreateFrame("Frame")
 loadingScreen:RegisterEvent("LOADING_SCREEN_DISABLED")
 loadingScreen:SetScript("OnEvent", function(self, event)
-    UpdateCustomArrowTexture(customArrowFrame.texture:GetTexture())
+    UpdateCustomArrowTexture(arrowDirectory .. CustomMinimapArrowDB.lastArrow)
 end)
 
 -- Create a custom arrow frame
@@ -39,51 +66,6 @@ customArrowFrame:SetScript("OnUpdate", function(self, elapsed)
         self.facing = playerFacing
     end
 end)
-
--- Function to update the arrow texture
-function UpdateCustomArrowTexture(arrowTexturePath)
-    -- Detect if in dungeon
-    inInstance, instanceType = IsInInstance()
-    -- If in a dungeon, hide all frames
-    if inInstance then
-        customArrowFrame:Hide()
-        facingFrame:Hide()
-        dialFrame:Hide()
-        needleFrame:Hide()
-        -- change the minimap arrow to the last saved arrow
-        Minimap:SetPlayerTexture(arrowTexturePath)
-        return
-    else
-        if type(CustomMinimapArrowDB.scaleFactor) == "number" then
-            customArrowFrame.texture:SetTexture(arrowTexturePath)
-            customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
-            customArrowFrame:Show()
-            -- Hide the default minimap arrow
-            Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
-        else
-            print("Error: scaleFactor is not set properly.")
-            -- Handle the error case, e.g., set a default scaleFactor or log an error
-        end
-
-        -- Show the facing display if enabled
-        if CustomMinimapArrowDB.showFacing then
-            facingFrame:Show()
-        end
-
-        -- Show the dial and needle if enabled
-        if CustomMinimapArrowDB.showDial then
-            dialFrame:Show()
-            needleFrame:Show()
-        end
-    end
-end
-
--- Load the saved or default arrow texture
-function LoadSavedArrow()
-    arrowDirectory = "Interface\\AddOns\\CustomMinimapArrow\\Arrows\\"
-    arrowTexturePath = arrowDirectory .. CustomMinimapArrowDB.lastArrow
-    UpdateCustomArrowTexture(arrowTexturePath)
-end
 
 -- Create a facing display frame
 facingFrame = CreateFrame("Frame", nil, UIParent)
@@ -124,6 +106,44 @@ needleFrame:SetScript("OnUpdate", function(self, elapsed)
     end
     self.texture:SetRotation(playerFacing)
 end)
+
+-- Function to update the arrow texture
+function UpdateCustomArrowTexture(arrowTexturePath)
+    -- Detect if in dungeon
+    inInstance, instanceType = IsInInstance()
+    -- If in a dungeon, hide all frames
+    if inInstance then
+        customArrowFrame:Hide()
+        facingFrame:Hide()
+        dialFrame:Hide()
+        needleFrame:Hide()
+        -- change the minimap arrow to the last saved arrow
+        Minimap:SetPlayerTexture(arrowTexturePath)
+        return
+    else
+        if type(CustomMinimapArrowDB.scaleFactor) == "number" then
+            customArrowFrame.texture:SetTexture(arrowTexturePath)
+            customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
+            customArrowFrame:Show()
+            -- Hide the default minimap arrow
+            Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
+        else
+            print("Error: scaleFactor is not set properly.")
+            -- Handle the error case, e.g., set a default scaleFactor or log an error
+        end
+
+        -- Show the facing display if enabled
+        if CustomMinimapArrowDB.showFacing then
+            facingFrame:Show()
+        end
+
+        -- Show the dial and needle if enabled
+        if CustomMinimapArrowDB.showDial then
+            dialFrame:Show()
+            needleFrame:Show()
+        end
+    end
+end
 
 -- Update the facing text
 function UpdateFacingText()
@@ -172,7 +192,7 @@ function CreateConfigPanel()
         CustomMinimapArrowDB.scaleFactor = value
         formattedValue = string.format("%.2f", value)  -- Format to two decimal places
         getglobal(self:GetName() .. 'Text'):SetText('Scale Factor: ' .. formattedValue)
-        UpdateCustomArrowTexture(customArrowFrame.texture:GetTexture())
+        UpdateCustomArrowTexture(arrowDirectory .. CustomMinimapArrowDB.lastArrow)
     end)
 
     -- Dropdown menu label
@@ -191,7 +211,7 @@ function CreateConfigPanel()
     function OnClick(self)
         UIDropDownMenu_SetSelectedID(dropdown, self:GetID())
         CustomMinimapArrowDB.lastArrow = self.value
-        LoadSavedArrow()
+        UpdateCustomArrowTexture(arrowDirectory .. CustomMinimapArrowDB.lastArrow)
         UpdateDropdownText()
     end
 
@@ -316,27 +336,3 @@ function CreateConfigPanel()
         panel:Hide()
     end)
 end
-
--- Event handling
-frame = CreateFrame("Frame")
-frame:SetScript("OnEvent", function(self, event, addonName)
-    if event == "ADDON_LOADED" and addonName == "CustomMinimapArrow" then
-        LoadSavedArrow()
-        CreateConfigPanel()
-        if CustomMinimapArrowDB.showFacing then
-            facingFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", CustomMinimapArrowDB.facingXPos, -CustomMinimapArrowDB.facingYPos)
-            facingFrame:Show()
-        else
-            facingFrame:Hide()
-        end
-        if CustomMinimapArrowDB.showDial then
-            dialFrame:Show()
-            needleFrame:Show()
-        else
-            dialFrame:Hide()
-            needleFrame:Hide()
-        end
-    end
-end)
-frame:RegisterEvent("ADDON_LOADED")
-frame:RegisterEvent("PLAYER_LOGIN")
