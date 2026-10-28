@@ -1,11 +1,11 @@
-## Interface: 120107, 120105, 120001, 50504, 40402, 38002, 30405, 20506, 16001, 11509, 11508
+## Interface: 120107, 120105, 120001, 50504, 40402, 38002, 30405, 20506, 16001, 11509
 ## Interface-Retail: 120107, 120105, 120001
 ## Interface-Camelot: 16001
 ## Interface-Mists: 50504
 ## Interface-Cata: 40402
 ## Interface-Wrath: 38002, 30405
 ## Interface-BCC: 20506
-## Interface-Classic: 11509, 11508
+## Interface-Classic: 11509
 ## Title: Custom Minimap Arrow
 ## Notes: Replaces the default minimap and worldmap arrow.
 ## Author: NiceShyGuy
