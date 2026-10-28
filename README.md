@@ -1,9 +1,9 @@
 # Custom Minimap Arrow Addon for World of Warcraft
 
-*Customization Panel*
+## *Customization Panel*
 ![Custom Minimap Arrow - Screenshot 1](Screenshot1.png)
 
-*Example of a Custom Arrow in Use*
+## *Example of a Custom Arrow in Use*
 ![Custom Minimap Arrow - Screenshot 2](Screenshot2.png)
 
 ## Overview
