@@ -1,0 +1,9 @@
+## Interface: 52610
+## Title: Custom Minimap Arrow
+## Notes: Replaces the default minimap arrow with a custom one.
+## Author: AAxBattery
+## Version: 1.0
+## DefaultState: Enabled
+## SavedVariables: CustomMinimapArrowDB
+
+CustomMinimapArrow.lua
