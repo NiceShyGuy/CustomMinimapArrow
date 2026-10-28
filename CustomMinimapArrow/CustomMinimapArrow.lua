@@ -55,11 +55,16 @@ function UpdateCustomArrowTexture(arrowTexturePath)
         Minimap:SetPlayerTexture(arrowTexturePath)
         return
     else
-        customArrowFrame.texture:SetTexture(arrowTexturePath)
-        customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
-        customArrowFrame:Show()
-        -- Hide the default minimap arrow
-        Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
+        if type(CustomMinimapArrowDB.scaleFactor) == "number" then
+            customArrowFrame.texture:SetTexture(arrowTexturePath)
+            customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
+            customArrowFrame:Show()
+            -- Hide the default minimap arrow
+            Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
+        else
+            print("Error: scaleFactor is not set properly.")
+            -- Handle the error case, e.g., set a default scaleFactor or log an error
+        end
 
         -- Show the facing display if enabled
         if CustomMinimapArrowDB.showFacing then
