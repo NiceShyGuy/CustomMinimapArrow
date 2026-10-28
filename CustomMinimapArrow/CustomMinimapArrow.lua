@@ -608,18 +608,24 @@ function ConfigPanel:Create()
     local function DropdownInitialize(self, level)
         local info = UIDropDownMenu_CreateInfo()
         local arrows = {
-            "Default",
-            "Arrow Gold", "Arrow Stone","Arrowhead Amber",
-            "Arrowhead Fire & Ice", "Arrowhead Ivory",
-            "Arrowhead Leaf", "Arrowhead Rune","Arrowhead Teal", "Dagger Azure",
-            "Dagger Black", "Dagger Bronze", "Dagger Ceremonial",
-            "Dagger Gold", "Sword Azure", "Sword Black",
-            "Sword Bronze", "Sword Feather", "Sword Leaf",
-            "Sword Red", "Sword Spiked", "Teardrop Azure",
-            "Teardrop Bronze", "Teardrop Gold", "Teardrop Green"
+            "Default", "Arrow Gold", "Arrow Stone",
+            "Arrowhead Amber", "Arrowhead Fire & Ice", "Arrowhead Ivory",
+            "Arrowhead Leaf", "Arrowhead Rune", "Arrowhead Teal",
+            "Dagger Azure", "Dagger Black", "Dagger Bronze",
+            "Dagger Ceremonial", "Dagger Gold",
+            "Sword Azure", "Sword Black", "Sword Bronze", "Sword Feather",
+            "Sword Leaf", "Sword Red", "Sword Spiked",
+            "Teardrop Azure Drip", "Teardrop Bright Red",
+            "Teardrop Bright Yellow", "Teardrop Bronze", "Teardrop Cyan",
+            "Teardrop Electric Blue", "Teardrop Gold Drip", "Teardrop Gold",
+            "Teardrop Green", "Teardrop Hot Pink", "Teardrop Magenta",
+            "Teardrop Okabe-Ito Blue", "Teardrop Okabe-Ito Bluish Green",
+            "Teardrop Okabe-Ito Orange", "Teardrop Okabe-Ito Reddish Purple",
+            "Teardrop Okabe-Ito Sky Blue", "Teardrop Okabe-Ito Vermillion",
+            "Teardrop Okabe-Ito Yellow", "Teardrop Orange"
         }
         
-        for key, value in pairs(arrows) do
+        for _, value in ipairs(arrows) do
             info.text = value
             info.value = value
             info.func = OnDropdownClick
