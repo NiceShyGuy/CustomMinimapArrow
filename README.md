@@ -25,7 +25,7 @@ This addon allows players to customize the appearance of their minimap arrow in 
 - Adjust the scale of the minimap arrow.
 - Choose from a variety of arrow designs.
 - Toggle the facing display on or off.
-- Reposition the facing display with X and Y position sliders.
+- Reposition the facing display by dragging.
 - Show/Hide the dial and needle overlay on the minimap.
 
 ## Support and Community
