@@ -13,7 +13,8 @@ CustomMinimapArrowDB.dialThickness = CustomMinimapArrowDB.dialThickness or 1
 CustomMinimapArrowDB.dialColor = CustomMinimapArrowDB.dialColor or {0, 0, 0, 1}
 CustomMinimapArrowDB.needleLength = CustomMinimapArrowDB.needleLength or 9
 CustomMinimapArrowDB.needleThickness = CustomMinimapArrowDB.needleThickness or 1
-CustomMinimapArrowDB.needleColor = CustomMinimapArrowDB.needleColor or {1, 0, 0, 1}
+CustomMinimapArrowDB.needleColor = CustomMinimapArrowDB.needleColor or {0, 1, 0, 1}
+if CustomMinimapArrowDB.showWorldMap == nil then CustomMinimapArrowDB.showWorldMap = false end
 
 -- Migration of old defaults to new defaults
 if CustomMinimapArrowDB.dialLength == 8 then CustomMinimapArrowDB.dialLength = 9 end
@@ -23,8 +24,8 @@ if CustomMinimapArrowDB.dialColor and CustomMinimapArrowDB.dialColor[1] == 1 and
 end
 if CustomMinimapArrowDB.needleLength == 45 then CustomMinimapArrowDB.needleLength = 9 end
 if CustomMinimapArrowDB.needleThickness == 2 then CustomMinimapArrowDB.needleThickness = 1 end
-if CustomMinimapArrowDB.needleColor and CustomMinimapArrowDB.needleColor[1] == 0 and CustomMinimapArrowDB.needleColor[2] == 1 and CustomMinimapArrowDB.needleColor[3] == 0 then
-    CustomMinimapArrowDB.needleColor = {1, 0, 0, 1}
+if CustomMinimapArrowDB.needleColor and CustomMinimapArrowDB.needleColor[1] == 1 and CustomMinimapArrowDB.needleColor[2] == 0 and CustomMinimapArrowDB.needleColor[3] == 0 then
+    CustomMinimapArrowDB.needleColor = {0, 1, 0, 1}
 end
 
 -- Path to the arrow textures
@@ -63,6 +64,13 @@ LoadedFrame:SetScript("OnEvent", function(self, event, ...)
                 DialFrame:Hide()
                 NeedleFrame:Hide()
             end
+
+            -- Show/hide world map arrow
+            if CustomMinimapArrowDB.showWorldMap then
+                WorldMapArrowFrame:Show()
+            else
+                WorldMapArrowFrame:Hide()
+            end
         end
     elseif event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
@@ -85,6 +93,136 @@ loadingScreen:RegisterEvent("LOADING_SCREEN_DISABLED")
 loadingScreen:SetScript("OnEvent", function(self, event)
     UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
 end)
+
+-- Create a world map arrow frame
+---@class WorldMapArrowFrame : Frame
+WorldMapArrowFrame = CreateFrame("Frame", "CustomMinimapArrowWorldMapFrame", UIParent)
+WorldMapArrowFrame:SetSize(32, 32)
+WorldMapArrowFrame:SetFrameStrata("TOOLTIP")
+WorldMapArrowFrame:SetFrameLevel(9999)
+WorldMapArrowFrame:Hide()
+WorldMapArrowFrame.texture = WorldMapArrowFrame:CreateTexture(nil, "OVERLAY", nil, 7)
+WorldMapArrowFrame.texture:SetAllPoints(WorldMapArrowFrame)
+
+-- Helper: hide the default Blizzard player arrow pin on the world map
+local function HideDefaultPlayerArrow()
+    if not WorldMapFrame or not WorldMapFrame.dataProviders then return end
+    for provider in pairs(WorldMapFrame.dataProviders) do
+        if type(provider) == "table" and provider.ShouldShowUnit then
+            if provider:ShouldShowUnit("player") and provider.pin then
+                provider.pin:SetAlpha(0)
+                provider.pin:EnableMouse(false)
+            end
+        end
+    end
+end
+
+-- Helper: restore the default Blizzard player arrow pin
+local function ShowDefaultPlayerArrow()
+    if not WorldMapFrame or not WorldMapFrame.dataProviders then return end
+    for provider in pairs(WorldMapFrame.dataProviders) do
+        if type(provider) == "table" and provider.ShouldShowUnit then
+            if provider:ShouldShowUnit("player") and provider.pin then
+                provider.pin:SetAlpha(1)
+                provider.pin:EnableMouse(true)
+            end
+        end
+    end
+end
+
+WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
+    if not self:IsVisible() then return end
+    if not WorldMapFrame or not WorldMapFrame:IsVisible() then
+        self:Hide()
+        return
+    end
+
+    -- Safeguard for older clients or versions without C_Map API
+    if not C_Map or not C_Map.GetBestMapForUnit or not C_Map.GetPlayerMapPosition then
+        self.texture:Hide()
+        ShowDefaultPlayerArrow()
+        return
+    end
+
+    -- Get player position on current map
+    local mapID = C_Map.GetBestMapForUnit("player")
+    local pos = mapID and C_Map.GetPlayerMapPosition(mapID, "player")
+    local px, py = nil, nil
+    if pos then
+        if pos.GetXY then
+            px, py = pos:GetXY()
+        elseif pos.x and pos.y then
+            px, py = pos.x, pos.y
+        end
+    end
+
+    if not px or (px == 0 and py == 0) then
+        -- In a dungeon or map coordinate is not currently available
+        self.texture:Hide()
+        ShowDefaultPlayerArrow()
+        return
+    end
+
+    -- Convert normalized map coords to screen coords via ScrollContainer.Child
+    local scrollChild = WorldMapFrame.ScrollContainer and WorldMapFrame.ScrollContainer.Child
+    if not scrollChild or not scrollChild:IsVisible() then
+        self.texture:Hide()
+        ShowDefaultPlayerArrow()
+        return
+    end
+
+    local mapWidth  = scrollChild:GetWidth()
+    local mapHeight = scrollChild:GetHeight()
+    local scale = scrollChild:GetEffectiveScale()
+    local left, top = scrollChild:GetLeft(), scrollChild:GetTop()
+    if not left or not top or not mapWidth or not mapHeight or not scale then
+        self.texture:Hide()
+        ShowDefaultPlayerArrow()
+        return
+    end
+
+    -- Hide the default Blizzard player arrow
+    HideDefaultPlayerArrow()
+
+    -- Compute screen-space position
+    local myScale = UIParent:GetEffectiveScale()
+    local screenX = (left + px * mapWidth) * scale / (myScale or 1)
+    local screenY = (top - py * mapHeight) * scale / (myScale or 1)
+
+    -- Update size based on arrow scale setting
+    local sz = 32 * (CustomMinimapArrowDB.scaleFactor or 1)
+    self:SetSize(sz, sz)
+
+    -- Position on screen
+    self:ClearAllPoints()
+    self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", screenX, screenY)
+
+    -- Rotate to match player facing
+    local facing = GetPlayerFacing()
+    if facing then
+        self.texture:SetRotation(facing)
+    end
+
+    -- Keep texture in sync with selected arrow
+    self.texture:SetTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
+    self.texture:Show()
+end)
+
+WorldMapArrowFrame:SetScript("OnHide", function(self)
+    ShowDefaultPlayerArrow()
+end)
+
+-- Hook WorldMapFrame show/hide to automatically manage our arrow
+if WorldMapFrame then
+    WorldMapFrame:HookScript("OnShow", function()
+        if CustomMinimapArrowDB.showWorldMap then
+            WorldMapArrowFrame:Show()
+        end
+    end)
+    WorldMapFrame:HookScript("OnHide", function()
+        WorldMapArrowFrame:Hide()
+    end)
+end
 
 -- Create a custom arrow frame
 ---@class CustomArrowFrame : Frame
@@ -362,7 +500,7 @@ function ConfigPanel:Create()
     -- Create the panel
     ---@class ConfigPanel : Frame
     self.Panel = CreateFrame("Frame", "CustomMinimapArrowConfigPanel", UIParent, "BasicFrameTemplateWithInset")
-    self.Panel:SetSize(480, 500)
+    self.Panel:SetSize(432, 386)
     self.Panel:SetPoint("CENTER")
     self.Panel:SetMovable(true)
     self.Panel:EnableMouse(true)
@@ -386,17 +524,8 @@ function ConfigPanel:Create()
     if CustomMinimapArrowDB.dialColor == nil then CustomMinimapArrowDB.dialColor = {0, 0, 0, 1} end
     if CustomMinimapArrowDB.needleLength == nil then CustomMinimapArrowDB.needleLength = 9 end
     if CustomMinimapArrowDB.needleThickness == nil then CustomMinimapArrowDB.needleThickness = 1 end
-    if CustomMinimapArrowDB.needleColor == nil then CustomMinimapArrowDB.needleColor = {1, 0, 0, 1} end
-
-    -- Column 1 Header (Arrow & Facing)
-    local ArrowColHeader = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    ArrowColHeader:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 40, -40)
-    ArrowColHeader:SetText("Arrow & Facing")
-
-    -- Column 2 Header (Dial & Needle)
-    local DialColHeader = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    DialColHeader:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -40)
-    DialColHeader:SetText("Dial & Needle")
+    if CustomMinimapArrowDB.needleColor == nil then CustomMinimapArrowDB.needleColor = {0, 1, 0, 1} end
+    if CustomMinimapArrowDB.showWorldMap == nil then CustomMinimapArrowDB.showWorldMap = false end
 
     -- Helper to create sliders
     local function CreateSliderHelper(name, title, minVal, maxVal, stepVal, value, onValueChanged)
@@ -420,58 +549,15 @@ function ConfigPanel:Create()
         return slider
     end
 
-    -- LEFT COLUMN ELEMENTS
+    -- ROW 1: Arrow Style (Left) and Show Facing Display (Right)
 
-    -- 1. Scale factor slider
-    local ScaleSlider = CreateSliderHelper("CustomMinimapArrowScaleSlider", "Arrow Scale", 0.5, 2.0, 0.1, CustomMinimapArrowDB.scaleFactor, function(val)
-        CustomMinimapArrowDB.scaleFactor = val
-        UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
-    end)
-    ScaleSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 40, -90)
-
-    -- 2. Facing Scale slider
-    local FacingScaleSlider = CreateSliderHelper("CustomMinimapArrowFacingScaleSlider", "Facing Text Scale", 0.5, 2.0, 0.1, CustomMinimapArrowDB.facingScale, function(val)
-        CustomMinimapArrowDB.facingScale = val
-        FacingFrame:SetScale(val)
-    end)
-    FacingScaleSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 40, -160)
-
-    -- 3. Show Facing Display Checkbox
-    local ShowFacingCheckbox = CreateFrame("CheckButton", "CustomMinimapArrowShowFacingCheckbox", self.Panel, "UICheckButtonTemplate")
-    ShowFacingCheckbox:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 40, -210)
-    ShowFacingCheckbox.text = ShowFacingCheckbox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    ShowFacingCheckbox.text:SetPoint("LEFT", ShowFacingCheckbox, "RIGHT", 8, 0)
-    ShowFacingCheckbox.text:SetText("Show Facing Display")
-    ShowFacingCheckbox:SetChecked(CustomMinimapArrowDB.showFacing)
-    ShowFacingCheckbox:SetScript("OnClick", function(self)
-        CustomMinimapArrowDB.showFacing = self:GetChecked()
-        if CustomMinimapArrowDB.showFacing then
-            FacingFrame:Show()
-        else
-            FacingFrame:Hide()
-        end
-    end)
-
-    -- 4. Reset Facing position button
-    local ResetFacingButton = CreateFrame("Button", nil, self.Panel, "UIPanelButtonTemplate")
-    ResetFacingButton:SetSize(140, 22)
-    ResetFacingButton:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 40, -250)
-    ResetFacingButton:SetText("Reset Facing Display")
-    ResetFacingButton:SetScript("OnClick", function()
-        FacingFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -34, -31)
-        CustomMinimapArrowDB.facingXPos, CustomMinimapArrowDB.facingYPos = -34, -31
-        FacingScaleSlider:SetValue(1)
-        CustomMinimapArrowDB.facingScale = 1
-        FacingFrame:SetScale(1)
-    end)
-
-    -- 5. Arrow menu label & Dropdown
+    -- Left Column: Select Arrow Style Label & Dropdown
     local ArrowLabel = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    ArrowLabel:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 40, -295)
+    ArrowLabel:SetPoint("LEFT", self.Panel, "TOPLEFT", 24, -52)
     ArrowLabel:SetText("Select Arrow Style:")
 
     local ArrowDropdown = CreateFrame("Frame", "CustomMinimapArrowDropdown", self.Panel, "UIDropDownMenuTemplate")
-    ArrowDropdown:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 25, -315)
+    ArrowDropdown:SetPoint("LEFT", self.Panel, "TOPLEFT", 9, -96)
 
     local function UpdateArrowDropdownText()
         UIDropDownMenu_SetText(ArrowDropdown, CustomMinimapArrowDB.lastArrow)
@@ -503,22 +589,87 @@ function ConfigPanel:Create()
             info.value = value
             info.func = OnDropdownClick
             info.checked = (CustomMinimapArrowDB.lastArrow == value)
+            
+            -- Add tiny preview of the arrow texture and rotate it 30 degrees
+            info.icon = ArrowDirectory .. value
+            info.tSizeX = 14
+            info.tSizeY = 14
+            
             UIDropDownMenu_AddButton(info, level)
+
+            -- Rotate the icon texture inside the dropdown menu button by 30 degrees
+            local listFrame = _G["DropDownList"..(level or 1)]
+            if listFrame then
+                local index = listFrame.numButtons
+                local iconTex = _G["DropDownList"..(level or 1).."Button"..index.."Icon"]
+                if iconTex then
+                    iconTex:SetRotation(math.rad(30))
+                end
+            end
         end
     end
 
     UIDropDownMenu_Initialize(ArrowDropdown, DropdownInitialize)
-    UIDropDownMenu_SetWidth(ArrowDropdown, 160)
-    UIDropDownMenu_SetButtonWidth(ArrowDropdown, 140)
+    UIDropDownMenu_SetWidth(ArrowDropdown, 165)
+    UIDropDownMenu_SetButtonWidth(ArrowDropdown, 145)
     UIDropDownMenu_JustifyText(ArrowDropdown, "LEFT")
     self.Panel:SetScript("OnShow", UpdateArrowDropdownText)
 
+    -- Right Column: Show on World Map Checkbox
+    local ShowWorldMapCheckbox = CreateFrame("CheckButton", "CustomMinimapArrowShowWorldMapCheckbox", self.Panel, "UICheckButtonTemplate")
+    ShowWorldMapCheckbox:SetPoint("LEFT", self.Panel, "TOPLEFT", 228, -52)
+    ShowWorldMapCheckbox.text = ShowWorldMapCheckbox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    ShowWorldMapCheckbox.text:SetPoint("LEFT", ShowWorldMapCheckbox, "RIGHT", 8, 0)
+    ShowWorldMapCheckbox.text:SetText("Show on World Map")
+    ShowWorldMapCheckbox:SetChecked(CustomMinimapArrowDB.showWorldMap)
+    ShowWorldMapCheckbox:SetScript("OnClick", function(self)
+        CustomMinimapArrowDB.showWorldMap = self:GetChecked()
+        if CustomMinimapArrowDB.showWorldMap then
+            WorldMapArrowFrame:Show()
+        else
+            WorldMapArrowFrame:Hide()
+        end
+    end)
 
-    -- RIGHT COLUMN ELEMENTS
+    -- Right Column: Show Facing Display Checkbox (below Show on World Map, aligned vertically with the dropdown menu)
+    local ShowFacingCheckbox = CreateFrame("CheckButton", "CustomMinimapArrowShowFacingCheckbox", self.Panel, "UICheckButtonTemplate")
+    ShowFacingCheckbox:SetPoint("LEFT", self.Panel, "TOPLEFT", 228, -96)
+    ShowFacingCheckbox.text = ShowFacingCheckbox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    ShowFacingCheckbox.text:SetPoint("LEFT", ShowFacingCheckbox, "RIGHT", 8, 0)
+    ShowFacingCheckbox.text:SetText("Show Facing Display")
+    ShowFacingCheckbox:SetChecked(CustomMinimapArrowDB.showFacing)
+    ShowFacingCheckbox:SetScript("OnClick", function(self)
+        CustomMinimapArrowDB.showFacing = self:GetChecked()
+        if CustomMinimapArrowDB.showFacing then
+            FacingFrame:Show()
+        else
+            FacingFrame:Hide()
+        end
+    end)
 
-    -- 1. Show Dial Checkbox
+
+    -- ROW 2: Arrow Scale (Left) and Facing Text Scale (Right)
+
+    -- Left Column: Arrow Scale Slider
+    local ScaleSlider = CreateSliderHelper("CustomMinimapArrowScaleSlider", "Arrow Scale", 0.5, 2.0, 0.1, CustomMinimapArrowDB.scaleFactor, function(val)
+        CustomMinimapArrowDB.scaleFactor = val
+        UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
+    end)
+    ScaleSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 24, -142)
+
+    -- Right Column: Facing Text Scale Slider
+    local FacingScaleSlider = CreateSliderHelper("CustomMinimapArrowFacingScaleSlider", "Facing Text Scale", 0.5, 2.0, 0.1, CustomMinimapArrowDB.facingScale, function(val)
+        CustomMinimapArrowDB.facingScale = val
+        FacingFrame:SetScale(val)
+    end)
+    FacingScaleSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 228, -142)
+
+
+    -- ROW 3: Show Dial Checkbox (Left) and Show Needle Checkbox (Right)
+
+    -- Left Column: Show Dial Checkbox
     local ShowDialCheckbox = CreateFrame("CheckButton", "CustomMinimapArrowShowDialCheckbox", self.Panel, "UICheckButtonTemplate")
-    ShowDialCheckbox:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -75)
+    ShowDialCheckbox:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 24, -175)
     ShowDialCheckbox.text = ShowDialCheckbox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     ShowDialCheckbox.text:SetPoint("LEFT", ShowDialCheckbox, "RIGHT", 8, 0)
     ShowDialCheckbox.text:SetText("Show Dial")
@@ -533,9 +684,9 @@ function ConfigPanel:Create()
         end
     end)
 
-    -- 2. Show Needle Checkbox
+    -- Right Column: Show Needle Checkbox
     local ShowNeedleCheckbox = CreateFrame("CheckButton", "CustomMinimapArrowShowNeedleCheckbox", self.Panel, "UICheckButtonTemplate")
-    ShowNeedleCheckbox:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -105)
+    ShowNeedleCheckbox:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 228, -175)
     ShowNeedleCheckbox.text = ShowNeedleCheckbox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     ShowNeedleCheckbox.text:SetPoint("LEFT", ShowNeedleCheckbox, "RIGHT", 8, 0)
     ShowNeedleCheckbox.text:SetText("Show Needle")
@@ -550,31 +701,54 @@ function ConfigPanel:Create()
         end
     end)
 
-    -- 3. Dial Tick Length Slider
+
+    -- ROW 4: Dial Tick Length (Left) and Needle Length (Right)
+
+    -- Left Column: Dial Tick Length Slider
     local DialLengthSlider = CreateSliderHelper("CustomMinimapArrowDialLengthSlider", "Dial Tick Length", 2, 20, 0.5, CustomMinimapArrowDB.dialLength, function(val)
         CustomMinimapArrowDB.dialLength = val
         if CustomMinimapArrowDB.showDial then RedrawDial() end
     end)
-    DialLengthSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -155)
+    DialLengthSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 24, -231)
 
-    -- 4. Dial Tick Thickness Slider
+    -- Right Column: Needle Length Slider
+    local NeedleLengthSlider = CreateSliderHelper("CustomMinimapArrowNeedleLengthSlider", "Needle Length", 2, 20, 0.5, CustomMinimapArrowDB.needleLength, function(val)
+        CustomMinimapArrowDB.needleLength = val
+        if CustomMinimapArrowDB.showNeedle then RedrawNeedle() end
+    end)
+    NeedleLengthSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 228, -231)
+
+
+    -- ROW 5: Dial Thickness (Left) and Needle Thickness (Right)
+
+    -- Left Column: Dial Thickness Slider
     local DialThicknessSlider = CreateSliderHelper("CustomMinimapArrowDialThicknessSlider", "Dial Thickness", 0.5, 5.0, 0.1, CustomMinimapArrowDB.dialThickness, function(val)
         CustomMinimapArrowDB.dialThickness = val
         if CustomMinimapArrowDB.showDial then RedrawDial() end
     end)
-    DialThicknessSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -215)
+    DialThicknessSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 24, -279)
 
-    -- 5. Dial Color Swatch
-    local DialColorLabel = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    DialColorLabel:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -265)
-    DialColorLabel:SetText("Dial Swatch Color:")
+    -- Right Column: Needle Thickness Slider
+    local NeedleThicknessSlider = CreateSliderHelper("CustomMinimapArrowNeedleThicknessSlider", "Needle Thickness", 0.5, 5.0, 0.1, CustomMinimapArrowDB.needleThickness, function(val)
+        CustomMinimapArrowDB.needleThickness = val
+        if CustomMinimapArrowDB.showNeedle then RedrawNeedle() end
+    end)
+    NeedleThicknessSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 228, -279)
 
+
+    -- ROW 6: Dial Color (Left) and Needle Color (Right)
+
+    -- Left Column: Dial Color
     local DialColorBorder = CreateFrame("Frame", nil, self.Panel)
     DialColorBorder:SetSize(22, 22)
-    DialColorBorder:SetPoint("LEFT", DialColorLabel, "RIGHT", 10, 0)
+    DialColorBorder:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 24, -312)
     local dialBorderTex = DialColorBorder:CreateTexture(nil, "BACKGROUND")
     dialBorderTex:SetAllPoints()
     dialBorderTex:SetColorTexture(0.6, 0.6, 0.6, 1)
+
+    local DialColorLabel = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    DialColorLabel:SetPoint("LEFT", DialColorBorder, "RIGHT", 10, 0)
+    DialColorLabel:SetText("Dial Color")
 
     local DialColorButton = CreateFrame("Button", nil, DialColorBorder)
     DialColorButton:SetSize(18, 18)
@@ -592,31 +766,17 @@ function ConfigPanel:Create()
         end)
     end)
 
-    -- 6. Needle Length Slider
-    local NeedleLengthSlider = CreateSliderHelper("CustomMinimapArrowNeedleLengthSlider", "Needle Length", 2, 20, 0.5, CustomMinimapArrowDB.needleLength, function(val)
-        CustomMinimapArrowDB.needleLength = val
-        if CustomMinimapArrowDB.showNeedle then RedrawNeedle() end
-    end)
-    NeedleLengthSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -315)
-
-    -- 7. Needle Thickness Slider
-    local NeedleThicknessSlider = CreateSliderHelper("CustomMinimapArrowNeedleThicknessSlider", "Needle Thickness", 0.5, 5.0, 0.1, CustomMinimapArrowDB.needleThickness, function(val)
-        CustomMinimapArrowDB.needleThickness = val
-        if CustomMinimapArrowDB.showNeedle then RedrawNeedle() end
-    end)
-    NeedleThicknessSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -375)
-
-    -- 8. Needle Color Swatch
-    local NeedleColorLabel = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    NeedleColorLabel:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 260, -425)
-    NeedleColorLabel:SetText("Needle Swatch Color:")
-
+    -- Right Column: Needle Color
     local NeedleColorBorder = CreateFrame("Frame", nil, self.Panel)
     NeedleColorBorder:SetSize(22, 22)
-    NeedleColorBorder:SetPoint("LEFT", NeedleColorLabel, "RIGHT", 10, 0)
+    NeedleColorBorder:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 228, -312)
     local needleBorderTex = NeedleColorBorder:CreateTexture(nil, "BACKGROUND")
     needleBorderTex:SetAllPoints()
     needleBorderTex:SetColorTexture(0.6, 0.6, 0.6, 1)
+
+    local NeedleColorLabel = self.Panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    NeedleColorLabel:SetPoint("LEFT", NeedleColorBorder, "RIGHT", 10, 0)
+    NeedleColorLabel:SetText("Needle Color")
 
     local NeedleColorButton = CreateFrame("Button", nil, NeedleColorBorder)
     NeedleColorButton:SetSize(18, 18)
@@ -635,10 +795,70 @@ function ConfigPanel:Create()
     end)
 
 
+    -- RESET AND CLOSE BUTTONS
+
+    -- Global Reset Button next to ArrowLabel
+    local ResetButton = CreateFrame("Button", nil, self.Panel, "UIPanelButtonTemplate")
+    ResetButton:SetSize(60, 18)
+    ResetButton:SetPoint("LEFT", ArrowLabel, "RIGHT", 10, 0)
+    ResetButton:SetText("Reset")
+    ResetButton:SetScript("OnClick", function()
+        CustomMinimapArrowDB.lastArrow = "Teardrop Green"
+        CustomMinimapArrowDB.scaleFactor = 1
+        CustomMinimapArrowDB.facingScale = 1
+        CustomMinimapArrowDB.showFacing = false
+        CustomMinimapArrowDB.facingXPos = -34
+        CustomMinimapArrowDB.facingYPos = -31
+        CustomMinimapArrowDB.showDial = true
+        CustomMinimapArrowDB.showNeedle = true
+        CustomMinimapArrowDB.dialLength = 9
+        CustomMinimapArrowDB.dialThickness = 1
+        CustomMinimapArrowDB.dialColor = {0, 0, 0, 1}
+        CustomMinimapArrowDB.needleLength = 9
+        CustomMinimapArrowDB.needleThickness = 1
+        CustomMinimapArrowDB.needleColor = {0, 1, 0, 1}
+        CustomMinimapArrowDB.showWorldMap = false
+
+        -- Reset Sliders
+        CustomMinimapArrowScaleSlider:SetValue(1)
+        CustomMinimapArrowFacingScaleSlider:SetValue(1)
+        CustomMinimapArrowDialLengthSlider:SetValue(9)
+        CustomMinimapArrowDialThicknessSlider:SetValue(1)
+        CustomMinimapArrowNeedleLengthSlider:SetValue(9)
+        CustomMinimapArrowNeedleThicknessSlider:SetValue(1)
+
+        -- Reset Checkboxes
+        CustomMinimapArrowShowFacingCheckbox:SetChecked(false)
+        CustomMinimapArrowShowDialCheckbox:SetChecked(true)
+        CustomMinimapArrowShowNeedleCheckbox:SetChecked(true)
+        CustomMinimapArrowShowWorldMapCheckbox:SetChecked(false)
+
+        -- Reset Color Swatches
+        dialSwatch:SetVertexColor(0, 0, 0)
+        needleSwatch:SetVertexColor(0, 1, 0)
+
+        -- Update dropdown selection text
+        UpdateArrowDropdownText()
+
+        -- Reset facing frame positioning/scale
+        FacingFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -34, -31)
+        FacingFrame:SetScale(1)
+        FacingFrame:Hide()
+        WorldMapArrowFrame:Hide()
+
+        DialFrame:Show()
+        NeedleFrame:Show()
+
+        -- Reapply texture and redraw dial/needle
+        UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
+        RedrawDial()
+        RedrawNeedle()
+    end)
+
     -- Close button
     local CloseButton = CreateFrame("Button", nil, self.Panel, "UIPanelButtonTemplate")
     CloseButton:SetSize(80, 22)
-    CloseButton:SetPoint("BOTTOMRIGHT", self.Panel, "BOTTOMRIGHT", -15, 10)
+    CloseButton:SetPoint("BOTTOMRIGHT", self.Panel, "BOTTOMRIGHT", -24, 15)
     CloseButton:SetText("Close")
     CloseButton:SetScript("OnClick", function()
         self.Panel:Hide()
