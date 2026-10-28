@@ -100,6 +100,7 @@ WorldMapArrowFrame = CreateFrame("Frame", "CustomMinimapArrowWorldMapFrame", UIP
 WorldMapArrowFrame:SetSize(32, 32)
 WorldMapArrowFrame:SetFrameStrata("TOOLTIP")
 WorldMapArrowFrame:SetFrameLevel(9999)
+WorldMapArrowFrame:EnableMouse(false)
 WorldMapArrowFrame:Hide()
 WorldMapArrowFrame.texture = WorldMapArrowFrame:CreateTexture(nil, "OVERLAY", nil, 7)
 WorldMapArrowFrame.texture:SetAllPoints(WorldMapArrowFrame)
@@ -111,7 +112,6 @@ local function HideDefaultPlayerArrow()
         if type(provider) == "table" and provider.ShouldShowUnit then
             if provider:ShouldShowUnit("player") and provider.pin then
                 provider.pin:SetAlpha(0)
-                provider.pin:EnableMouse(false)
             end
         end
     end
@@ -124,7 +124,6 @@ local function ShowDefaultPlayerArrow()
         if type(provider) == "table" and provider.ShouldShowUnit then
             if provider:ShouldShowUnit("player") and provider.pin then
                 provider.pin:SetAlpha(1)
-                provider.pin:EnableMouse(true)
             end
         end
     end
@@ -144,8 +143,8 @@ WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
         return
     end
 
-    -- Get player position on current map
-    local mapID = C_Map.GetBestMapForUnit("player")
+    -- Get mapID of the currently viewed map area
+    local mapID = WorldMapFrame.GetMapID and WorldMapFrame:GetMapID()
     local pos = mapID and C_Map.GetPlayerMapPosition(mapID, "player")
     local px, py = nil, nil
     if pos then
@@ -157,7 +156,7 @@ WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
     end
 
     if not px or (px == 0 and py == 0) then
-        -- In a dungeon or map coordinate is not currently available
+        -- In a dungeon, or viewing a map area the player is not currently on
         self.texture:Hide()
         ShowDefaultPlayerArrow()
         return
