@@ -1,10 +1,10 @@
 # Custom Minimap Arrow Addon for World of Warcraft
 
-![Custom Minimap Arrow - Screenshot 1](Screenshot1.png)
 *Customization Panel*
+![Custom Minimap Arrow - Screenshot 1](Screenshot1.png)
 
-![Custom Minimap Arrow - Screenshot 2](Screenshot2.png)
 *Example of a Custom Arrow in Use*
+![Custom Minimap Arrow - Screenshot 2](Screenshot2.png)
 
 ## Overview
 This addon allows players to customize the appearance of their minimap arrow in World of Warcraft. With a variety of arrow styles to choose from, players can personalize their UI to better match their individual preferences.
