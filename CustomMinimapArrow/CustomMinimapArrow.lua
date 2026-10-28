@@ -13,6 +13,13 @@ SlashCmdList["CUSTOMMINIMAPARROW"] = function(msg)
     CustomMinimapArrowConfigPanel:Show()
 end
 
+-- Detect loading screen enabled
+local loadingScreen = CreateFrame("Frame")
+loadingScreen:RegisterEvent("LOADING_SCREEN_DISABLED")
+loadingScreen:SetScript("OnEvent", function(self, event)
+    UpdateCustomArrowTexture(customArrowFrame.texture:GetTexture())
+end)
+
 -- Create a custom arrow frame
 customArrowFrame = CreateFrame("Frame", nil, Minimap)
 customArrowFrame:SetSize(32, 32)
@@ -23,7 +30,11 @@ customArrowFrame.texture:SetAllPoints(customArrowFrame)
 customArrowFrame:SetScript("OnUpdate", function(self, elapsed)
     -- Update the arrow's facing direction
     playerFacing = GetPlayerFacing()
+    if playerFacing == nil then
+        return
+    end
     if playerFacing ~= self.facing then
+        -- if minimap texture is not set to spacer, then set it to spacer
         self.texture:SetRotation(playerFacing)
         self.facing = playerFacing
     end
@@ -31,9 +42,36 @@ end)
 
 -- Function to update the arrow texture
 function UpdateCustomArrowTexture(arrowTexturePath)
-    customArrowFrame.texture:SetTexture(arrowTexturePath)
-    customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
-    customArrowFrame:Show()
+    -- Detect if in dungeon
+    inInstance, instanceType = IsInInstance()
+    print(inInstance)
+    -- If in a dungeon, hide all frames
+    if inInstance then
+        customArrowFrame:Hide()
+        facingFrame:Hide()
+        dialFrame:Hide()
+        needleFrame:Hide()
+        -- change the minimap arrow to the last saved arrow
+        Minimap:SetPlayerTexture(arrowTexturePath)
+        return
+    else
+        customArrowFrame.texture:SetTexture(arrowTexturePath)
+        customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
+        customArrowFrame:Show()
+        -- Hide the default minimap arrow
+        Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
+
+        -- Show the facing display if enabled
+        if CustomMinimapArrowDB.showFacing then
+            facingFrame:Show()
+        end
+
+        -- Show the dial and needle if enabled
+        if CustomMinimapArrowDB.showDial then
+            dialFrame:Show()
+            needleFrame:Show()
+        end
+    end
 end
 
 -- Load the saved or default arrow texture
@@ -77,13 +115,18 @@ needleFrame.texture:SetAllPoints(needleFrame)
 -- rotate the needle frame to match the player's facing direction
 needleFrame:SetScript("OnUpdate", function(self, elapsed)
     playerFacing = GetPlayerFacing()
+    if playerFacing == nil then
+        return
+    end
     self.texture:SetRotation(playerFacing)
 end)
-
 
 -- Update the facing text
 function UpdateFacingText()
     playerFacing = GetPlayerFacing()
+    if playerFacing == nil then
+        return
+    end
     -- Convert radians to degrees and adjust to make it behave like a compass
     facingDegrees = (1 - playerFacing / (2 * math.pi)) * 360
     -- Ensure the value is between 0 and 360
@@ -152,9 +195,9 @@ function CreateConfigPanel()
         info = UIDropDownMenu_CreateInfo()
         arrows = {
             "Default",
-            "Arrow Gold", "Arrow Stone",
-            "Arrowhead Amber", "Arrowhead Fire & Ice", "Arrowhead Ivory",
-            "Arrowhead Leaf", "Arrowhead Rune", "Dagger Azure",
+            "Arrow Gold", "Arrow Stone","Arrowhead Amber",
+            "Arrowhead Fire & Ice", "Arrowhead Ivory",
+            "Arrowhead Leaf", "Arrowhead Rune","Arrowhead Teal", "Dagger Azure",
             "Dagger Black", "Dagger Bronze", "Dagger Ceremonial",
             "Dagger Gold", "Sword Azure", "Sword Black",
             "Sword Bronze", "Sword Feather", "Sword Leaf",
@@ -274,8 +317,6 @@ end
 frame = CreateFrame("Frame")
 frame:SetScript("OnEvent", function(self, event, addonName)
     if event == "ADDON_LOADED" and addonName == "CustomMinimapArrow" then
-        -- Hide the default minimap arrow
-        Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
         LoadSavedArrow()
         CreateConfigPanel()
         if CustomMinimapArrowDB.showFacing then
