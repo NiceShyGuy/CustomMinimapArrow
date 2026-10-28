@@ -1,4 +1,4 @@
-## Interface: 52610
+## Interface: 100200
 ## Title: Custom Minimap Arrow
 ## Notes: Replaces the default minimap arrow with a custom one.
 ## Author: AAxBattery
