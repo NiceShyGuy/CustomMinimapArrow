@@ -10,19 +10,23 @@
 This addon allows players to customize the appearance of their minimap arrow in World of Warcraft. With a variety of arrow styles to choose from, players can personalize their UI to better match their individual preferences.
 
 ## Features
-- Easy-to-use configuration panel to select your favorite arrow style.
-- Multiple arrow designs available: including Arrow, Arrowhead, Dagger, Sword, and Teardrop themes.
-- Save your selection and have it persist across game sessions.
+- Scale Adjustment: Dynamically adjust the size of your minimap arrow.
+- Custom Arrow Replacement: Change the default minimap arrow with a selection of custom arrow designs.
+- Facing Display: A movable frame that shows your character's facing direction in degrees, like a compass.
+- Dial and Needle: Adds a dial and needle overlay on the minimap to visually represent your facing direction.
 
 ## Installation
 1. Download the addon.
-2. Extract the folder into `World of Warcraft\_classic_era_\Interface\AddOns`.
+2. Unzip and copy `CustomMinimapArrow` folder into the World of Warcraft `Interface\AddOns` folder.
 3. Restart World of Warcraft or reload your UI.
 
 ## Usage
-- Type `/cma` in the game chat to open the configuration panel.
-- Select your desired arrow style from the dropdown menu.
-- Enjoy your new minimap arrow!
+- Open with `/cma` command.
+- Adjust the scale of the minimap arrow.
+- Choose from a variety of arrow designs.
+- Toggle the facing display on or off.
+- Reposition the facing display with X and Y position sliders.
+- Show/Hide the dial and needle overlay on the minimap.
 
 ## Support and Community
 
