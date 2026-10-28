@@ -60,6 +60,7 @@ local function CreateConfigPanel()
     local function Initialize(self, level)
         local info = UIDropDownMenu_CreateInfo()
         local arrows = {
+            "Arrow Gold", "Arrow Stone",
             "Arrowhead Amber", "Arrowhead Fire & Ice", "Arrowhead Ivory",
             "Arrowhead Leaf", "Arrowhead Rune", "Dagger Azure",
             "Dagger Black", "Dagger Bronze", "Dagger Ceremonial",

@@ -11,7 +11,7 @@ This addon allows players to customize the appearance of their minimap arrow in 
 
 ## Features
 - Easy-to-use configuration panel to select your favorite arrow style.
-- Multiple arrow designs available: including Dagger, Sword, and Teardrop themes.
+- Multiple arrow designs available: including Arrow, Arrowhead, Dagger, Sword, and Teardrop themes.
 - Save your selection and have it persist across game sessions.
 
 ## Installation
