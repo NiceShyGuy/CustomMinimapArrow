@@ -1,4 +1,4 @@
-## Interface: 30403
+## Interface: 38001, 30405, 30403, 40403, 40404
 ## Title: Custom Minimap Arrow
 ## Notes: Replaces the default minimap arrow with a custom one.
 ## Author: AAxBattery
