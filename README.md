@@ -1,10 +1,10 @@
 # Custom Minimap Arrow Addon for World of Warcraft
 
 ## *Example of a Custom Arrow in Use*
-![Custom Minimap Arrow - Screenshot 1](screenshot1.png)
+![Custom Minimap Arrow - Screenshot 1](Screenshot1.png)
 
 ## *Customization Panel*
-![Custom Minimap Arrow - Screenshot 2](screenshot2.png)
+![Custom Minimap Arrow - Screenshot 2](Screenshot2.png)
 
 ## Overview
 Take full control of your minimap arrow! Stylish designs, custom vector dial & needle with adjustable ticks, thickness & colors. Always renders on top. Smart dungeon & Rotate Minimap support. Works on Retail & all Classic versions.
