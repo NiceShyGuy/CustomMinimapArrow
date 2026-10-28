@@ -113,12 +113,22 @@ WorldMapArrowFrame.texture = WorldMapArrowFrame:CreateTexture(nil, "OVERLAY", ni
 WorldMapArrowFrame.texture:SetAllPoints(WorldMapArrowFrame)
 
 -- Helper: hide the default Blizzard player arrow pin on the world map
-local function HideDefaultPlayerArrow()
+-- We intentionally avoid changing shared provider.pin objects here because those can
+-- be used by party/raid members as well, and making them transparent hides those units.
+local function SetDefaultPlayerArrowVisibility(visible)
     if not WorldMapFrame or not WorldMapFrame.dataProviders then return end
+
     for provider in pairs(WorldMapFrame.dataProviders) do
-        if type(provider) == "table" and provider.ShouldShowUnit then
-            if provider:ShouldShowUnit("player") and provider.pin then
-                provider.pin:SetAlpha(0)
+        if type(provider) == "table" and type(provider.ShouldShowUnit) == "function" and provider:ShouldShowUnit("player") then
+            local pin
+            if type(provider.GetPin) == "function" then
+                pin = provider:GetPin("player")
+            elseif type(provider.pins) == "table" then
+                pin = provider.pins["player"] or provider.pins.player
+            end
+
+            if pin then
+                pin:SetAlpha(visible and 1 or 0)
             end
         end
     end
@@ -126,14 +136,11 @@ end
 
 -- Helper: restore the default Blizzard player arrow pin
 local function ShowDefaultPlayerArrow()
-    if not WorldMapFrame or not WorldMapFrame.dataProviders then return end
-    for provider in pairs(WorldMapFrame.dataProviders) do
-        if type(provider) == "table" and provider.ShouldShowUnit then
-            if provider:ShouldShowUnit("player") and provider.pin then
-                provider.pin:SetAlpha(1)
-            end
-        end
-    end
+    SetDefaultPlayerArrowVisibility(true)
+end
+
+local function HideDefaultPlayerArrow()
+    SetDefaultPlayerArrowVisibility(false)
 end
 
 WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)

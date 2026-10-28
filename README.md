@@ -41,7 +41,7 @@ If you need help or have questions about this application, the best way to get s
 To join the Discord, click on this invite link: [Discord](https://discord.com/invite/aP9CjWE)
 
 
-### Donations
+## Donations
 
 If you enjoy using this project and find it helpful, please consider supporting its development. Your support helps to ensure the project's continued development, bug fixes, and improvements.
 
@@ -51,7 +51,7 @@ If you would like to make a financial contribution to support development, you c
 
 Your donation, no matter the size, is greatly appreciated and will help to support future development and maintenance. Thank you for your generosity!
 
-### Other Ways to Support
+## Other Ways to Support
 
 - Share this project.
 - Report any issues you encounter or suggest new features and improvements by creating a new issue on the GitHub repository.
