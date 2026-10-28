@@ -1,9 +1,11 @@
-## Interface: 120100, 120007, 120000, 120001, 120002
+## Interface: 120100, 120000, 120001, 120002
 ## Title: Custom Minimap Arrow
 ## Notes: Replaces the default minimap and worldmap arrow.
 ## Author: NiceShyGuy
 ## Version: 1.0
 ## DefaultState: Enabled
 ## SavedVariables: CustomMinimapArrowDB
+## IconTexture: Interface/AddOns/CustomMinimapArrow/Icon
+## Category: Map
 
 CustomMinimapArrow.lua
