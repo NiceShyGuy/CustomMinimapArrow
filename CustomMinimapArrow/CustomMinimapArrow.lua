@@ -126,7 +126,8 @@ function UpdateCustomArrowTexture(arrowTexturePath)
             customArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
             customArrowFrame:Show()
             -- Hide the default minimap arrow
-            Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
+            -- Minimap:SetPlayerTexture("[[Interface\\Common\\Spacer]]")
+            Minimap:SetPlayerTexture(arrowDirectory .. "Empty")
         else
             print("Error: scaleFactor is not set properly.")
             -- Handle the error case, e.g., set a default scaleFactor or log an error
