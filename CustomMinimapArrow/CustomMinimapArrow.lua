@@ -2,6 +2,7 @@
 CustomMinimapArrowDB = CustomMinimapArrowDB or {}
 CustomMinimapArrowDB.lastArrow = CustomMinimapArrowDB.lastArrow or "Teardrop Green"
 CustomMinimapArrowDB.scaleFactor = CustomMinimapArrowDB.scaleFactor or 1
+if CustomMinimapArrowDB.scaleFactor < 1 then CustomMinimapArrowDB.scaleFactor = 1 end
 CustomMinimapArrowDB.facingScale = CustomMinimapArrowDB.facingScale or 1
 CustomMinimapArrowDB.showFacing = CustomMinimapArrowDB.showFacing or false
 CustomMinimapArrowDB.facingXPos = CustomMinimapArrowDB.facingXPos or -34
@@ -535,6 +536,9 @@ function ConfigPanel:Create()
     -- Create the panel
     ---@class ConfigPanel : Frame
     self.Panel = CreateFrame("Frame", "CustomMinimapArrowConfigPanel", UIParent, "BasicFrameTemplateWithInset")
+    table.insert(UISpecialFrames, self.Panel:GetName())
+    self.Panel:SetFrameStrata("FULLSCREEN_DIALOG")
+    self.Panel:SetFrameLevel(9999)
     self.Panel:SetSize(432, 386)
     self.Panel:SetPoint("CENTER")
     self.Panel:SetMovable(true)
@@ -594,66 +598,158 @@ function ConfigPanel:Create()
     local ArrowDropdown = CreateFrame("Frame", "CustomMinimapArrowDropdown", self.Panel, "UIDropDownMenuTemplate")
     ArrowDropdown:SetPoint("LEFT", self.Panel, "TOPLEFT", 9, -96)
 
+    local arrows = {
+        "Default", "Default Black",
+        "Default Bright Red", "Default Bright Yellow", "Default Cyan",
+        "Default Electric Blue", "Default Gold", "Default Green",
+        "Default Hot Pink", "Default Magenta", "Default Okabe-Ito Blue",
+        "Default Okabe-Ito Bluish Green", "Default Okabe-Ito Orange",
+        "Default Okabe-Ito Reddish Purple", "Default Okabe-Ito Sky Blue",
+        "Default Okabe-Ito Vermillion", "Default Okabe-Ito Yellow",
+        "Default Orange", "Teardrop Bright Red",
+        "Teardrop Bright Yellow", "Teardrop Cyan",
+        "Teardrop Electric Blue", "Teardrop Gold",
+        "Teardrop Green", "Teardrop Hot Pink", "Teardrop Magenta", "Teardrop Orange",
+        "Teardrop Okabe-Ito Blue", "Teardrop Okabe-Ito Bluish Green",
+        "Teardrop Okabe-Ito Orange", "Teardrop Okabe-Ito Reddish Purple",
+        "Teardrop Okabe-Ito Sky Blue", "Teardrop Okabe-Ito Vermillion",
+        "Teardrop Okabe-Ito Yellow",
+        "Arrow Gold", "Arrow Stone",
+        "Arrowhead Amber", "Arrowhead Fire & Ice", "Arrowhead Ivory",
+        "Arrowhead Leaf", "Arrowhead Rune", "Arrowhead Teal",
+        "Dagger Azure", "Dagger Black", "Dagger Bronze",
+        "Dagger Ceremonial", "Dagger Gold",
+        "Sword Azure", "Sword Black", "Sword Bronze", "Sword Feather",
+        "Sword Leaf", "Sword Red", "Sword Spiked"
+    }
+    local arrowMenuButtons = {}
+    local arrowMenu
+    local arrowMenuDismiss
+
     local function UpdateArrowDropdownText()
         UIDropDownMenu_SetText(ArrowDropdown, CustomMinimapArrowDB.lastArrow)
-    end
-
-    local function OnDropdownClick(self)
-        UIDropDownMenu_SetSelectedID(ArrowDropdown, self:GetID())
-        CustomMinimapArrowDB.lastArrow = self.value
-        UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
-        UpdateArrowDropdownText()
-    end
-
-    local function DropdownInitialize(self, level)
-        local info = UIDropDownMenu_CreateInfo()
-        local arrows = {
-            "Default", "Arrow Gold", "Arrow Stone",
-            "Arrowhead Amber", "Arrowhead Fire & Ice", "Arrowhead Ivory",
-            "Arrowhead Leaf", "Arrowhead Rune", "Arrowhead Teal",
-            "Dagger Azure", "Dagger Black", "Dagger Bronze",
-            "Dagger Ceremonial", "Dagger Gold",
-            "Sword Azure", "Sword Black", "Sword Bronze", "Sword Feather",
-            "Sword Leaf", "Sword Red", "Sword Spiked",
-            "Teardrop Azure Drip", "Teardrop Bright Red",
-            "Teardrop Bright Yellow", "Teardrop Bronze", "Teardrop Cyan",
-            "Teardrop Electric Blue", "Teardrop Gold Drip", "Teardrop Gold",
-            "Teardrop Green", "Teardrop Hot Pink", "Teardrop Magenta",
-            "Teardrop Okabe-Ito Blue", "Teardrop Okabe-Ito Bluish Green",
-            "Teardrop Okabe-Ito Orange", "Teardrop Okabe-Ito Reddish Purple",
-            "Teardrop Okabe-Ito Sky Blue", "Teardrop Okabe-Ito Vermillion",
-            "Teardrop Okabe-Ito Yellow", "Teardrop Orange"
-        }
-        
-        for _, value in ipairs(arrows) do
-            info.text = value
-            info.value = value
-            info.func = OnDropdownClick
-            info.checked = (CustomMinimapArrowDB.lastArrow == value)
-            
-            -- Add tiny preview of the arrow texture and rotate it 30 degrees
-            info.icon = ArrowDirectory .. value
-            info.tSizeX = 14
-            info.tSizeY = 14
-            
-            UIDropDownMenu_AddButton(info, level)
-
-            -- Rotate the icon texture inside the dropdown menu button by 30 degrees
-            local listFrame = _G["DropDownList"..(level or 1)]
-            if listFrame then
-                local index = listFrame.numButtons
-                local iconTex = _G["DropDownList"..(level or 1).."Button"..index.."Icon"]
-                if iconTex then
-                    iconTex:SetRotation(math.rad(30))
-                end
+        for _, button in ipairs(arrowMenuButtons) do
+            if button.value == CustomMinimapArrowDB.lastArrow then
+                button.check:Show()
+                button.label:SetTextColor(1, 0.82, 0)
+            else
+                button.check:Hide()
+                button.label:SetTextColor(0.9, 0.9, 0.9)
             end
         end
     end
 
-    UIDropDownMenu_Initialize(ArrowDropdown, DropdownInitialize)
+    UIDropDownMenu_Initialize(ArrowDropdown, function() end)
     UIDropDownMenu_SetWidth(ArrowDropdown, 165)
     UIDropDownMenu_SetButtonWidth(ArrowDropdown, 145)
     UIDropDownMenu_JustifyText(ArrowDropdown, "LEFT")
+
+    local columnCount = 3
+    local columnWidth = 220
+    local rowHeight = 21
+    local padding = 8
+    local rowsPerColumn = math.ceil(#arrows / columnCount)
+
+    arrowMenuDismiss = CreateFrame("Button", nil, UIParent)
+    arrowMenuDismiss:SetAllPoints(UIParent)
+    arrowMenuDismiss:SetFrameStrata("TOOLTIP")
+    arrowMenuDismiss:SetFrameLevel(999)
+    arrowMenuDismiss:EnableMouse(true)
+    arrowMenuDismiss:SetAlpha(0)
+    arrowMenuDismiss:Hide()
+
+    arrowMenu = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+    arrowMenu:SetFrameStrata("TOOLTIP")
+    arrowMenu:SetFrameLevel(1000)
+    arrowMenu:SetSize(
+        padding * 2 + columnWidth * columnCount,
+        padding * 2 + rowHeight * rowsPerColumn
+    )
+    arrowMenu:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = false,
+        edgeSize = 12,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    arrowMenu:SetBackdropColor(0.04, 0.04, 0.04, 0.98)
+    arrowMenu:SetBackdropBorderColor(0.75, 0.58, 0.25, 1)
+    arrowMenu:SetClampedToScreen(true)
+    arrowMenu:Hide()
+
+    arrowMenuDismiss:SetScript("OnClick", function()
+        arrowMenu:Hide()
+        arrowMenuDismiss:Hide()
+    end)
+
+    for column = 1, columnCount - 1 do
+        local separator = arrowMenu:CreateTexture(nil, "BORDER")
+        separator:SetColorTexture(0.65, 0.52, 0.3, 0.45)
+        separator:SetWidth(1)
+        separator:SetPoint("TOPLEFT", arrowMenu, "TOPLEFT", padding + column * columnWidth, -padding)
+        separator:SetPoint("BOTTOMLEFT", arrowMenu, "BOTTOMLEFT", padding + column * columnWidth, padding)
+    end
+
+    for index, value in ipairs(arrows) do
+        local arrowValue = value
+        local column = math.floor((index - 1) / rowsPerColumn)
+        local row = (index - 1) % rowsPerColumn
+        local button = CreateFrame("Button", nil, arrowMenu)
+        button.value = arrowValue
+        button:SetSize(columnWidth, rowHeight)
+        button:SetPoint("TOPLEFT", arrowMenu, "TOPLEFT",
+            padding + column * columnWidth, -padding - row * rowHeight)
+
+        local highlight = button:CreateTexture(nil, "HIGHLIGHT")
+        highlight:SetAllPoints(button)
+        highlight:SetColorTexture(1, 0.75, 0.1, 0.22)
+
+        button.check = button:CreateTexture(nil, "ARTWORK")
+        button.check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+        button.check:SetSize(12, 12)
+        button.check:SetPoint("LEFT", button, "LEFT", 4, 0)
+
+        button.label = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        button.label:SetPoint("LEFT", button, "LEFT", 20, 0)
+        button.label:SetPoint("RIGHT", button, "RIGHT", -28, 0)
+        button.label:SetJustifyH("LEFT")
+        button.label:SetText(arrowValue)
+
+        local icon = button:CreateTexture(nil, "ARTWORK")
+        icon:SetTexture(ArrowDirectory .. arrowValue)
+        icon:SetSize(20, 20)
+        icon:SetPoint("RIGHT", button, "RIGHT", -5, 0)
+        icon:SetRotation(math.rad(30))
+
+        button:SetScript("OnClick", function()
+            CustomMinimapArrowDB.lastArrow = arrowValue
+            UpdateArrowTexture(ArrowDirectory .. arrowValue)
+            UpdateArrowDropdownText()
+            arrowMenu:Hide()
+            arrowMenuDismiss:Hide()
+        end)
+
+        arrowMenuButtons[#arrowMenuButtons + 1] = button
+    end
+
+    local arrowDropdownButton = _G[ArrowDropdown:GetName() .. "Button"]
+    arrowDropdownButton:SetScript("OnClick", function()
+        if arrowMenu:IsShown() then
+            arrowMenu:Hide()
+            arrowMenuDismiss:Hide()
+        else
+            arrowMenu:ClearAllPoints()
+            arrowMenu:SetPoint("TOPLEFT", ArrowDropdown, "BOTTOMLEFT", -5, 0)
+            arrowMenuDismiss:Show()
+            arrowMenu:Show()
+            arrowMenu:Raise()
+        end
+    end)
+
+    self.Panel:HookScript("OnHide", function()
+        arrowMenu:Hide()
+        arrowMenuDismiss:Hide()
+    end)
     self.Panel:SetScript("OnShow", UpdateArrowDropdownText)
 
     -- Right Column: Show on World Map Checkbox
@@ -692,7 +788,7 @@ function ConfigPanel:Create()
     -- ROW 2: Arrow Scale (Left) and Facing Text Scale (Right)
 
     -- Left Column: Arrow Scale Slider
-    local ScaleSlider = CreateSliderHelper("CustomMinimapArrowScaleSlider", "Arrow Scale", 0.5, 2.0, 0.1, CustomMinimapArrowDB.scaleFactor, function(val)
+    local ScaleSlider = CreateSliderHelper("CustomMinimapArrowScaleSlider", "Arrow Scale", 1.0, 2.0, 0.1, CustomMinimapArrowDB.scaleFactor, function(val)
         CustomMinimapArrowDB.scaleFactor = val
         UpdateArrowTexture(ArrowDirectory .. CustomMinimapArrowDB.lastArrow)
     end)

@@ -14,7 +14,8 @@ Take full control of your minimap arrow! Stylish designs, custom vector dial & n
 - Smart Dungeon & Rotate Minimap Support – Automatically adapts to the “Rotate Minimap” setting. In dungeons the arrow stays correctly oriented and scaled; outdoors it falls back to the engine’s native behavior when needed.
 - Fully Customizable Vector Dial & Needle – Programmatically drawn 36-tick dial (major ticks every 30°) and a dynamic rotating needle that tracks your heading in real time. Both scale and move with the minimap and can be shown or hidden independently.
 - Precise Scale Controls – Independently adjust the size of the minimap arrow and the facing-text display.
-- Custom Arrow Styles – Replace the default minimap arrow with a selection stylized arrows, high viz arrows, and Okabe-Ito palette colorblind-safe arrows. WoW Forever Default arrow available.
+- Custom Arrow Styles – Overlay the minimap arrow with a selection of stylized arrows, high-visibility arrows, and Okabe-Ito palette colorblind-safe arrows. A WoW default-arrow style is also available, however it is not the WoW forever default-arrow due to client engine rendering no visible texture/frame to extract original asset. May try to manually recreate.
+- WoW: Forever limitation – WoW: Forever does not expose an addon API or accessible FrameXML object for its native minimap player marker. Custom arrows can only be drawn as overlays there; the native marker cannot be replaced or hidden by this addon.
 - Facing Display – Movable compass-style frame that shows your exact facing direction in degrees, with its own scale and reset option.
 - World Map Support - Added a custom `WorldMapArrowFrame` that renders above all other UI elements. Automatically hides the default Blizzard player arrow. Robust handling for dungeons/instances and full cross-version compatibility (Classic through Retail).  
 - Respects Arrow Scale setting and player facing.
