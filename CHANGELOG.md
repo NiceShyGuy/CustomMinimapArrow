@@ -83,3 +83,11 @@
 ## 1.2
 
 - Added an Empty texture to address a Retail bug.
+
+## 1.1
+
+- Dungeon Bug Fix
+
+## 1.0
+
+- Removed debug print
