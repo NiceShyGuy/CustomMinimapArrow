@@ -1,16 +1,18 @@
 # Custom Minimap Arrow Addon for World of Warcraft
 
+<p align="center"><img src="imgs/cma.png" alt="Custom Minimap Arrow logo" width="160"></p>
+
 ## Overview
-Take full control of your minimap arrow! Stylish designs, custom vector dial & needle with adjustable ticks, thickness & colors. Always renders on top. Smart dungeon & Rotate Minimap support. World Map support. Works on Retail & all Classic versions.
+Take full control of your minimap arrow! Stylish designs, custom vector dial & needle with adjustable ticks, thickness & colors. Always renders on top. Smart dungeon & Rotate Minimap support. World Map support. Works on Retail & all Classic versions & WoW Forever.
 
 <table>
   <tr>
-    <td align="center"><img src="Screenshot1.png" alt="Custom minimap arrow in game" height="200"><br><sub>Minimap arrow</sub></td>
-    <td align="center"><img src="Screenshot2.png" alt="Custom Minimap Arrow settings panel" height="200"><br><sub>Settings panel</sub></td>
-    <td align="center"><img src="Screenshot3.png" alt="Custom arrow on the world map" height="200"><br><sub>World map arrow</sub></td>
+    <td align="center"><img src="imgs/Screenshot1.png" alt="Custom minimap arrow in game" height="200"><br><sub>Minimap arrow</sub></td>
+    <td align="center"><img src="imgs/Screenshot2.png" alt="Custom Minimap Arrow settings panel" height="200"><br><sub>Settings panel</sub></td>
+    <td align="center"><img src="imgs/Screenshot3.png" alt="Custom arrow on the world map" height="200"><br><sub>World map arrow</sub></td>
   </tr>
   <tr>
-    <td colspan="3" align="center"><img src="Arrows.png" alt="Available custom arrow designs" width="689"><br><sub>Available arrow styles</sub></td>
+    <td colspan="3" align="center"><img src="imgs/Arrows.png" alt="Available custom arrow designs" width="689"><br><sub>Available arrow styles</sub></td>
   </tr>
 </table>
 
