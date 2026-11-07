@@ -3,11 +3,13 @@
 ## Overview
 Take full control of your minimap arrow! Stylish designs, custom vector dial & needle with adjustable ticks, thickness & colors. Always renders on top. Smart dungeon & Rotate Minimap support. World Map support. Works on Retail & all Classic versions.
 
-![Custom Minimap Arrow - Screenshot 1](Screenshot1.png)
-
-![Custom Minimap Arrow - Screenshot 2](Screenshot3.png)
-
-![Custom Minimap Arrow - Screenshot 2](Screenshot2.png)
+<table>
+  <tr>
+    <td align="center"><img src="Screenshot1.png" alt="Custom minimap arrow in game" height="200"><br><sub>Minimap arrow</sub></td>
+    <td align="center"><img src="Screenshot2.png" alt="Custom Minimap Arrow settings panel" height="200"><br><sub>Settings panel</sub></td>
+    <td align="center"><img src="Screenshot3.png" alt="Custom arrow on the world map" height="200"><br><sub>World map arrow</sub></td>
+  </tr>
+</table>
 
 ## Features
 - Always-On-Top Arrow Rendering – High-priority overlay layering and frame depth ensure your custom minimap arrow always appears above other minimap elements and addons.
