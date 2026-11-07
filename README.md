@@ -9,6 +9,9 @@ Take full control of your minimap arrow! Stylish designs, custom vector dial & n
     <td align="center"><img src="Screenshot2.png" alt="Custom Minimap Arrow settings panel" height="200"><br><sub>Settings panel</sub></td>
     <td align="center"><img src="Screenshot3.png" alt="Custom arrow on the world map" height="200"><br><sub>World map arrow</sub></td>
   </tr>
+  <tr>
+    <td colspan="3" align="center"><img src="Arrows.png" alt="Available custom arrow designs" width="689"><br><sub>Available arrow styles</sub></td>
+  </tr>
 </table>
 
 ## Features
