@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.4
 
 - Upscaled all arrow textures to 128x128.
 - Added high-resolution default-style arrows based on WoW: Forever's native minimap arrow, recreated as addon art.

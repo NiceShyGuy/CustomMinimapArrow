@@ -344,7 +344,35 @@ NeedleFrame:SetFrameStrata("TOOLTIP")
 NeedleFrame:SetFrameLevel(910)
 
 -- Helper function to open the Color Picker
+local colorPickerOriginalStrata
+local colorPickerHooksInstalled = false
+local function RaiseColorPickerIfPanelShown(frame)
+    if not (ConfigPanel and ConfigPanel.Panel and ConfigPanel.Panel:IsShown()) then return end
+
+    if not colorPickerOriginalStrata then
+        colorPickerOriginalStrata = frame:GetFrameStrata()
+    end
+    frame:SetFrameStrata("TOOLTIP")
+end
+
+local function EnsureColorPickerLayersAbovePanel()
+    if colorPickerHooksInstalled then return end
+
+    ColorPickerFrame:HookScript("OnShow", function(self)
+        RaiseColorPickerIfPanelShown(self)
+    end)
+    ColorPickerFrame:HookScript("OnHide", function(self)
+        if colorPickerOriginalStrata then
+            self:SetFrameStrata(colorPickerOriginalStrata)
+            colorPickerOriginalStrata = nil
+        end
+    end)
+    colorPickerHooksInstalled = true
+end
+
 function OpenColorPicker(r, g, b, callback)
+    EnsureColorPickerLayersAbovePanel()
+
     if ColorPickerFrame.SetupColorPickerAndShow then
         ColorPickerFrame:SetupColorPickerAndShow({
             r = r,
@@ -375,6 +403,7 @@ function OpenColorPicker(r, g, b, callback)
         ColorPickerFrame.hasOpacity = false
         ColorPickerFrame:Show()
     end
+    RaiseColorPickerIfPanelShown(ColorPickerFrame)
 end
 
 -- Programmatic Dial Drawing
