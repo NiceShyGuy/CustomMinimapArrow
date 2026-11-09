@@ -1,10 +1,16 @@
 # Changelog
 
+## 2.0.5
+
+- fixed a bug in color pickers appearing behind config window.
+
+
 ## 2.0.4
 
 - Upscaled all arrow textures to 128x128.
 - Added high-resolution default-style arrows based on WoW: Forever's native minimap arrow, recreated as addon art.
 - Adjusted the Drip, Sword, and Dagger arrow artwork to cover WoW: Forever's native minimap marker, which addons cannot hide; Sword arrows are thicker for coverage.
+- fixed a bug in color pickers appearing behind config window.
 
 ## 2.0.3
 
