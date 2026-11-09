@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Upscaled all arrow textures to 128x128.
+- Added high-resolution default-style arrows based on WoW: Forever's native minimap arrow, recreated as addon art.
+- Adjusted the Drip, Sword, and Dagger arrow artwork to cover WoW: Forever's native minimap marker, which addons cannot hide; Sword arrows are thicker for coverage.
+
 ## 2.0.3
 
 - Reworked the arrow selector into a multi-column menu with arrow previews and a visible selection indicator.

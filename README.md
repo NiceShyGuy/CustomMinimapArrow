@@ -21,8 +21,9 @@ Take full control of your minimap arrow! Stylish designs, custom vector dial & n
 - Smart Dungeon & Rotate Minimap Support – Automatically adapts to the “Rotate Minimap” setting. In dungeons the arrow stays correctly oriented and scaled; outdoors it falls back to the engine’s native behavior when needed.
 - Fully Customizable Vector Dial & Needle – Programmatically drawn 36-tick dial (major ticks every 30°) and a dynamic rotating needle that tracks your heading in real time. Both scale and move with the minimap and can be shown or hidden independently.
 - Precise Scale Controls – Independently adjust the size of the minimap arrow and the facing-text display.
-- Custom Arrow Styles – Overlay the minimap arrow with a selection of stylized arrows, high-visibility arrows, and Okabe-Ito palette colorblind-safe arrows. A WoW default-arrow style is also available, however it is not the WoW forever default-arrow due to client engine rendering no visible texture/frame to extract original asset. May try to manually recreate.
-- WoW: Forever limitation – WoW: Forever does not expose an addon API or accessible FrameXML object for its native minimap player marker. Custom arrows can only be drawn as overlays there; the native marker cannot be replaced or hidden by this addon.
+- High-Resolution Arrow Art – All arrow textures are now 128×128. The default-style arrows are high-resolution variations of WoW: Forever’s default minimap arrow, recreated as addon art.
+- Custom Arrow Styles – Choose from stylized designs, high-visibility colors, and Okabe-Ito palette colorblind-safe arrows.
+- WoW: Forever Overlay Compatibility – WoW: Forever does not allow addons to hide its native minimap marker, so custom arrows are drawn over it. The Drip, Sword, and Dagger designs have been adjusted to cover the native marker; Sword arrows are thicker to ensure coverage.
 - Facing Display – Movable compass-style frame that shows your exact facing direction in degrees, with its own scale and reset option.
 - World Map Support - Added a custom `WorldMapArrowFrame` that renders above all other UI elements. Automatically hides the default Blizzard player arrow. Robust handling for dungeons/instances and full cross-version compatibility (Classic through Retail).  
 - Respects Arrow Scale setting and player facing.

@@ -31,6 +31,10 @@ end
 
 -- Path to the arrow textures
 ArrowDirectory = "Interface\\AddOns\\CustomMinimapArrow\\Arrows\\"
+-- Keep the display size independent of the 128x128 source texture resolution.
+local ARROW_BASE_SIZE = 32
+local MINIMAP_SCALE_OFFSET = 0.1
+local WORLD_MAP_SCALE_OFFSET = 0.7
 
 -- Compatibility helper: not every client exposes Minimap:SetPlayerTexture.
 local function SafeSetPlayerTexture(texture)
@@ -105,7 +109,7 @@ end)
 -- Create a world map arrow frame
 ---@class WorldMapArrowFrame : Frame
 WorldMapArrowFrame = CreateFrame("Frame", "CustomMinimapArrowWorldMapFrame", UIParent)
-WorldMapArrowFrame:SetSize(32, 32)
+WorldMapArrowFrame:SetSize(ARROW_BASE_SIZE, ARROW_BASE_SIZE)
 WorldMapArrowFrame:SetFrameStrata("TOOLTIP")
 WorldMapArrowFrame:SetFrameLevel(9999)
 WorldMapArrowFrame:EnableMouse(false)
@@ -204,10 +208,10 @@ WorldMapArrowFrame:SetScript("OnUpdate", function(self, elapsed)
     -- Hide the default Blizzard player arrow
     HideDefaultPlayerArrow()
 
-    -- Update size based on arrow scale setting and world map frame scale to match a normal map at 100%.
+    -- World map arrows render smaller natively, so apply a larger scale offset.
     local mapFrameScale = WorldMapFrame:GetScale() or 1
-    local arrowScale = (CustomMinimapArrowDB.scaleFactor or 1) * mapFrameScale
-    local sz = 32 * arrowScale
+    local arrowScale = ((CustomMinimapArrowDB.scaleFactor or 1) + WORLD_MAP_SCALE_OFFSET) * mapFrameScale
+    local sz = ARROW_BASE_SIZE * arrowScale
     self:SetSize(sz, sz)
 
     -- Always use UIParent for screen-space positioning.
@@ -263,7 +267,7 @@ end
 -- Create a custom arrow frame
 ---@class CustomArrowFrame : Frame
 CustomArrowFrame = CreateFrame("Frame", nil, Minimap)
-CustomArrowFrame:SetSize(32, 32)
+CustomArrowFrame:SetSize(ARROW_BASE_SIZE, ARROW_BASE_SIZE)
 CustomArrowFrame:SetPoint("CENTER")
 CustomArrowFrame:Hide()
 CustomArrowFrame:SetFrameStrata("TOOLTIP")
@@ -478,7 +482,8 @@ function UpdateArrowTexture(arrowTexturePath)
     -- Otherwise, we can use the custom overlay frame!
     if type(CustomMinimapArrowDB.scaleFactor) == "number" then
         CustomArrowFrame.texture:SetTexture(arrowTexturePath)
-        CustomArrowFrame:SetSize(32 * CustomMinimapArrowDB.scaleFactor, 32 * CustomMinimapArrowDB.scaleFactor)
+        local arrowSize = ARROW_BASE_SIZE * (CustomMinimapArrowDB.scaleFactor + MINIMAP_SCALE_OFFSET)
+        CustomArrowFrame:SetSize(arrowSize, arrowSize)
         CustomArrowFrame:Show()
         -- Hide the default minimap arrow
         SafeSetPlayerTexture(ArrowDirectory .. "Empty")
@@ -567,6 +572,11 @@ function ConfigPanel:Create()
     if CustomMinimapArrowDB.showWorldMap == nil then CustomMinimapArrowDB.showWorldMap = false end
 
     -- Helper to create sliders
+    local function FormatSliderValue(value)
+        local formatted = string.format("%.1f", value)
+        return (formatted:gsub("%.0$", ""))
+    end
+
     local function CreateSliderHelper(name, title, minVal, maxVal, stepVal, value, onValueChanged)
         local slider = CreateFrame("Slider", name, self.Panel, "OptionsSliderTemplate")
         slider:SetMinMaxValues(minVal, maxVal)
@@ -575,13 +585,13 @@ function ConfigPanel:Create()
         slider:SetWidth(180)
         
         local nameStr = slider:GetName()
-        _G[nameStr .. "Low"]:SetText(string.format("%.1f", minVal))
-        _G[nameStr .. "High"]:SetText(string.format("%.1f", maxVal))
-        _G[nameStr .. "Text"]:SetText(title .. ": " .. string.format("%.2f", value))
+        _G[nameStr .. "Low"]:SetText(FormatSliderValue(minVal))
+        _G[nameStr .. "High"]:SetText(FormatSliderValue(maxVal))
+        _G[nameStr .. "Text"]:SetText(title .. ": " .. FormatSliderValue(value))
         
         slider:SetScript("OnValueChanged", function(self, val)
             local roundedVal = math.floor(val / stepVal + 0.5) * stepVal
-            _G[nameStr .. "Text"]:SetText(title .. ": " .. string.format("%.2f", roundedVal))
+            _G[nameStr .. "Text"]:SetText(title .. ": " .. FormatSliderValue(roundedVal))
             onValueChanged(roundedVal)
         end)
         
@@ -606,7 +616,8 @@ function ConfigPanel:Create()
         "Default Okabe-Ito Bluish Green", "Default Okabe-Ito Orange",
         "Default Okabe-Ito Reddish Purple", "Default Okabe-Ito Sky Blue",
         "Default Okabe-Ito Vermillion", "Default Okabe-Ito Yellow",
-        "Default Orange", "Teardrop Bright Red",
+        "Default Orange", "Drip Gold", "Drip Bronze",
+        "Drip Azure", "Teardrop Bright Red",
         "Teardrop Bright Yellow", "Teardrop Cyan",
         "Teardrop Electric Blue", "Teardrop Gold",
         "Teardrop Green", "Teardrop Hot Pink", "Teardrop Magenta", "Teardrop Orange",
@@ -842,14 +853,14 @@ function ConfigPanel:Create()
     -- ROW 4: Dial Tick Length (Left) and Needle Length (Right)
 
     -- Left Column: Dial Tick Length Slider
-    local DialLengthSlider = CreateSliderHelper("CustomMinimapArrowDialLengthSlider", "Dial Tick Length", 2, 20, 0.5, CustomMinimapArrowDB.dialLength, function(val)
+    local DialLengthSlider = CreateSliderHelper("CustomMinimapArrowDialLengthSlider", "Dial Tick Length", 2, 20, 0.1, CustomMinimapArrowDB.dialLength, function(val)
         CustomMinimapArrowDB.dialLength = val
         if CustomMinimapArrowDB.showDial then RedrawDial() end
     end)
     DialLengthSlider:SetPoint("TOPLEFT", self.Panel, "TOPLEFT", 24, -231)
 
     -- Right Column: Needle Length Slider
-    local NeedleLengthSlider = CreateSliderHelper("CustomMinimapArrowNeedleLengthSlider", "Needle Length", 2, 20, 0.5, CustomMinimapArrowDB.needleLength, function(val)
+    local NeedleLengthSlider = CreateSliderHelper("CustomMinimapArrowNeedleLengthSlider", "Needle Length", 2, 20, 0.1, CustomMinimapArrowDB.needleLength, function(val)
         CustomMinimapArrowDB.needleLength = val
         if CustomMinimapArrowDB.showNeedle then RedrawNeedle() end
     end)
