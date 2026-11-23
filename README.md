@@ -19,15 +19,14 @@ Take full control of your minimap arrow! Stylish designs, custom vector dial & n
 ## Features
 - Always-On-Top Arrow Rendering – High-priority overlay layering and frame depth ensure your custom minimap arrow always appears above other minimap elements and addons.
 - Smart Dungeon & Rotate Minimap Support – Automatically adapts to the “Rotate Minimap” setting. In dungeons the arrow stays correctly oriented and scaled; outdoors it falls back to the engine’s native behavior when needed.
-- Fully Customizable Vector Dial & Needle – Programmatically drawn 36-tick dial (major ticks every 30°) and a dynamic rotating needle that tracks your heading in real time. Both scale and move with the minimap and can be shown or hidden independently.
-- Precise Scale Controls – Independently adjust the size of the minimap arrow and the facing-text display.
-- High-Resolution Arrow Art – All arrow textures are now 128×128. The default-style arrows are high-resolution variations of WoW: Forever’s default minimap arrow, recreated as addon art.
-- Custom Arrow Styles – Choose from stylized designs, high-visibility colors, and Okabe-Ito palette colorblind-safe arrows.
-- WoW: Forever Overlay Compatibility – WoW: Forever does not allow addons to hide its native minimap marker, so custom arrows are drawn over it. The Drip, Sword, and Dagger designs have been adjusted to cover the native marker; Sword arrows are thicker to ensure coverage.
-- Facing Display – Movable compass-style frame that shows your exact facing direction in degrees, with its own scale and reset option.
-- World Map Support - Added a custom `WorldMapArrowFrame` that renders above all other UI elements. Automatically hides the default Blizzard player arrow. Robust handling for dungeons/instances and full cross-version compatibility (Classic through Retail).  
-- Respects Arrow Scale setting and player facing.
-- Configuration Panel – Open with /cma. Intuitive layout gives you direct control over arrow style, facing text, dial/needle visibility, tick length & thickness, needle length & thickness, and live color swatches (with clear borders for dark colors). Supports both modern and classic color pickers.
+- Fully Customizable Vector Dial & Needle – Programmatically drawn 36-tick dial and a dynamic rotating needle that tracks your heading in real time. Both scale and move with the minimap and can be shown or hidden independently.
+- Precise Scale Controls – Independently adjust the size of the minimap arrow, world map arrow, dial overlay, and facing-text display.
+- High-Resolution Arrow Art – All arrow textures are now 128×128. default-style arrows high-resolution variations WoW: Forever’s default minimap arrow, recreated addon art.
+- Custom Arrow Styles – Choose stylized designs, high-visibility colors, and Okabe-Ito palette colorblind-safe arrows.
+- WoW: Forever Overlay Compatibility – WoW: Forever does not allow addons hide native minimap marker, so custom arrows drawn over it. Drip, Sword, and Dagger designs adjusted to cover native marker.
+- Facing Display – Movable compass-style frame shows exact facing direction in degrees, its own scale and reset option.
+- World Map Support – Custom `WorldMapArrowFrame` renders above all other UI elements, Questie pins, and OpenMap addon pins. independent world map scale slider. Automatically hides the default Blizzard player arrow. Enabled by default.
+- Configuration Panel – Open /cma. Intuitive layout gives direct control over arrow style, world map toggle & scale, facing text, dial scale, dial/needle visibility, tick length & thickness, needle length & thickness, and live color swatches. Supports both modern and classic color pickers.
 
 ## Installation
 1. Download the addon.
@@ -36,12 +35,12 @@ Take full control of your minimap arrow! Stylish designs, custom vector dial & n
 
 ## Usage
 - Type `/cma` to open the expanded settings panel.
-- Adjust Arrow Scale and Facing Text Scale with the sliders.
+- Adjust Minimap Arrow Scale, World Map Arrow Scale, Dial Scale, and Facing Text Scale with the sliders.
 - Select an arrow style from the dropdown.
 - Toggle the Facing Display on/off and drag it anywhere on screen; use the Reset Facing button to return it to default.
 - Independently show or hide the Dial and Needle overlays.
 - Fine-tune Dial Tick Length, Dial Thickness, Needle Length, and Needle Thickness.
-- Click the color swatches to pick any color for the dial or needle (live preview included).
+- Click the color swatches to pick any color for the dial or needle.
 
 ## Community
 

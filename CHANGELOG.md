@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0
+
+- Added dedicated World Map Arrow Scale slider (0.25 to 2.0).
+- Added Dial Scale slider (0.5 to 2.0) to scale the vector dial and needle together.
+- Expanded Needle Length slider range from 2 to 50.
+- "Show on World Map" is now enabled by default on new installs and settings reset.
+- Fixed world map arrow layering over Questie quest icons on the default world map.
+- Added full OpenMap addon compatibility: custom arrow renders above OpenMap flight master wyverns and map pins.
+- Fixed OpenMap coordinate positioning, zoom drift, and animation jitter during zoom and pan.
+- Added viewport bounds clipping to keep the custom arrow inside the visible world map container.
+- Improved configuration panel spacing and layout.
+
 ## 2.0.5
 
 - fixed a bug in color pickers appearing behind config window.
