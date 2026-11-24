@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2
+
+- lua file was accidentally excluded in last zip
+
 ## 2.1.1
 
 - Fixed a load error caused by ApplyDialScale being called before it was defined.

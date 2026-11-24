@@ -9,7 +9,7 @@
 ## Title: Custom Minimap Arrow
 ## Notes: Replaces the default minimap and worldmap arrow.
 ## Author: NiceShyGuy
-## Version: 2.1.1
+## Version: 2.1.2
 ## DefaultState: Enabled
 ## SavedVariables: CustomMinimapArrowDB
 ## IconTexture: Interface/AddOns/CustomMinimapArrow/Icon
