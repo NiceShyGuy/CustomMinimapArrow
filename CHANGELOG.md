@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+- Fixed a load error caused by ApplyDialScale being called before it was defined.
+
 ## 2.1.0
 
 - Added dedicated World Map Arrow Scale slider (0.25 to 2.0).
